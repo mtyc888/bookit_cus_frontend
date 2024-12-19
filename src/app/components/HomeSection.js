@@ -17,14 +17,14 @@ export default function HomeSection() {
             {/*Map through the JSON array and display each item*/}
             {message.length > 0 ? (
                 <ul>
-                    {message.map((item) => {
+                    {message.map((item) => (
                         <li key={item.id}>
-
+                            <p>{item.name} {item.phoneNo}</p>
                         </li>
-                    })}
+                    ))}
                 </ul>
             ) : (
-                <p></p>
+                <p>Non</p>
             )}
         </section>
     );
