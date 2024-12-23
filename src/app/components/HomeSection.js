@@ -6,26 +6,15 @@ export default function HomeSection() {
 
     useEffect(() => {
         // Fetch data from the backend
-        fetch('http://localhost:3001/appointments')
+        fetch('http://localhost:3001/')
             .then((response) => response.json())
-            .then((data) => setMessage(data))
+            .then((data) => setMessage([data]))
             .catch((error) => console.error('Error fetching data:', error));
     }, []);
 
     return (
         <section>
-            {/*Map through the JSON array and display each item*/}
-            {message.length > 0 ? (
-                <ul>
-                    {message.map((item) => (
-                        <li key={item.id}>
-                            <p>{item.name} {item.phoneNo}</p>
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <p>Non</p>
-            )}
+            
         </section>
     );
 }
