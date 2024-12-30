@@ -39,7 +39,7 @@ export default function ResourceStep({ nextStep, prevStep, handleDataChange, for
     }
     return(
         <div className='flex flex-col'>
-            <h1>Select a Resource</h1>
+            <h1 className=''>Select a Resource</h1>
             {resourceData.length > 0 ? (
                 resourceData.map((resource) => (
                     <button key={resource.resource_id} onClick={() => handleSelectedResource(resource)}>
