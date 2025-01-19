@@ -1,50 +1,77 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { useRouter } from "next/router";
-export default function LocationStep({ nextStep, prevStep, handleDataChange }){
-    const [locationData, setLocationData] = useState([]);
+import React, { useState, useEffect } from "react";
+
+export default function Locations({ nextStep, prevStep, handleDataChange, business }) {
+    const [locationsData, setLocationsData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const router = useRouter();
-    const { business_id } = router.query;
+
     useEffect(() => {
-        //fetch locations data from backend via api
-        const fetchLocations = async () =>{
-            try{
-                const response = await fetch(`http://localhost:3001/locations/${business_id}`);
-                if(!response.ok){
+        const fetchLocations = async () => {
+            try {
+                if (!business?.slug) {
+                    console.error("Business slug not available");
+                    return;
+                }
+
+                const response = await fetch(`http://localhost:3001/api/locations/${business.slug}`);
+                if (!response.ok) {
                     throw new Error("Failed to fetch locations");
                 }
                 const data = await response.json();
-                console.log(data);
-                setLocationData(data);
+                console.log("Locations data:", data);
+                setLocationsData(data.data);
                 setLoading(false);
-            }catch(error){
-                console.error("Error fetching locations", error);
+            } catch (error) {
+                console.error("Error fetching locations:", error);
                 setLoading(false);
             }
-        }
+        };
+
         fetchLocations();
-    },[])
-    if(loading){
-        return <p>Loading location...</p>
+    }, [business]);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center">
+                <p className="text-gray-600">Loading locations...</p>
+            </div>
+        );
     }
-    const handleSelectedLocation = (location) => {
-        handleDataChange("location_id", location.location_id);
-        nextStep();
-    };
-    return(
-        <div className='flex flex-col'>
-            <h1>Select a Location</h1>
-            {locationData.data.length > 0 ? (
-                locationData.data.map((location) => (
-                    <button key={location.location_id} onClick={() => handleSelectedLocation(location)}>
-                        {location.name}
-                    </button>
-                ))
+
+    return (
+        <div className="flex flex-col justify-between items-center gap-4">
+            <h1 className="text-xl font-semibold text-gray-800">Select a Location</h1>
+            {locationsData && locationsData.length > 0 ? (
+                <div className="w-full space-y-3">
+                    {locationsData.map((location) => (
+                        <button
+                            key={location.location_id}
+                            onClick={() => {
+                                handleDataChange("location", {
+                                    id: location.location_id,
+                                    name: location.name,
+                                    address: location.address
+                                });
+                                nextStep();
+                            }}
+                            className="w-full px-4 py-3 text-left border rounded-xl hover:bg-gray-50 transition-colors duration-200"
+                        >
+                            <div className="flex flex-col">
+                                <span className="text-gray-800 font-medium">{location.name}</span>
+                                <span className="text-gray-600 text-sm">{location.address}</span>
+                            </div>
+                        </button>
+                    ))}
+                </div>
             ) : (
-                <p>No locations available</p>
+                <p className="text-gray-600">No locations available</p>
             )}
-            <button onClick={prevStep}>Go Back</button>
+            <button
+                onClick={prevStep}
+                className="mt-4 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
+            >
+                Go Back
+            </button>
         </div>
-    )
+    );
 }

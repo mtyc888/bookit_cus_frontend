@@ -5,7 +5,8 @@ import Locations from './LocationStep';
 import Resources from './ResourceStep';
 import Booking from './BookingStep';
 import Summary from './Summary';
-export default function MultiStepForm() {
+
+export default function MultiStepForm({ business }) { // Add business prop here
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
@@ -14,7 +15,7 @@ export default function MultiStepForm() {
         booking_id: null,
         resource_id: null
     });
-    //load the step and formData from local storage when user reloads the page
+
     useEffect(() => {
         const savedStep = localStorage.getItem("currentStep");
         const savedFormData = localStorage.getItem("formData");
@@ -24,17 +25,15 @@ export default function MultiStepForm() {
         if(savedFormData){
             setFormData(JSON.parse(savedFormData));
         }
-        //after finish fetching, set this to false
         setLoading(false);
     }, []);
 
-    //save the step to local storage whenever it changes
     useEffect(() =>{
         if(!loading){
             localStorage.setItem("currentStep", step);
         }
     }, [step, loading]);
-    //save the form data to local storage whenever it changes
+
     useEffect(() =>{
         if(!loading){
             localStorage.setItem("formData", JSON.stringify(formData));
@@ -47,7 +46,7 @@ export default function MultiStepForm() {
     const handleDataChange = (field, value) => {
         setFormData({ ...formData, [field]:value})
     }
-    //if loading is true display this
+
     if(loading){
         return(
             <div>Loading...</div>
@@ -56,14 +55,53 @@ export default function MultiStepForm() {
 
     switch (step){
         case 1:
-            return <Services nextStep={nextStep} handleDataChange={handleDataChange} formData={formData}/>
+            return (
+                <Services 
+                    nextStep={nextStep} 
+                    handleDataChange={handleDataChange} 
+                    formData={formData}
+                    business={business}
+                />
+            );
         case 2:
-            return <Locations nextStep={nextStep} prevStep={prevStep} handleDataChange={handleDataChange} formData={formData}/>
+            return (
+                <Locations 
+                    nextStep={nextStep} 
+                    prevStep={prevStep} 
+                    handleDataChange={handleDataChange} 
+                    formData={formData}
+                    business={business} 
+                />
+            );
         case 3:
-            return <Resources nextStep={nextStep} prevStep={prevStep} handleDataChange={handleDataChange} formData={formData}/>
+            return (
+                <Resources 
+                    nextStep={nextStep} 
+                    prevStep={prevStep} 
+                    handleDataChange={handleDataChange} 
+                    formData={formData}
+                    business={business} 
+                />
+            );
         case 4:
-            return <Booking nextStep={nextStep} prevStep={prevStep} handleDataChange={handleDataChange} formData={formData}/>
+            return (
+                <Booking 
+                    nextStep={nextStep} 
+                    prevStep={prevStep} 
+                    handleDataChange={handleDataChange} 
+                    formData={formData}
+                    business={business}
+                />
+            );
         case 5:
-            return <Summary formData={formData} prevStep={prevStep} setStep={setStep} setFormData={setFormData}/>
+            return (
+                <Summary 
+                    formData={formData} 
+                    prevStep={prevStep} 
+                    setStep={setStep} 
+                    setFormData={setFormData}
+                    business={business} 
+                />
+            );
     }
 }

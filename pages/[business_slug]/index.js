@@ -1,22 +1,26 @@
-// Next.js Dynamic Route: pages/[business_id]/index.js
+// pages/[business_slug]/index.js
 import MultiStepForm from "@/app/components/MultiStepForm";
 import "@/app/globals.css";
 
 export async function getServerSideProps(context) {
-    const { business_id } = context.params;
+    const { business_slug } = context.params; // Changed from business_id to business_slug
 
     try {
-        // Fetch the business data from your Node.js API using user_id
-        const res = await fetch(`http://localhost:3001/api/business/${business_id}`);
+        // Updated API endpoint to use slug
+        const res = await fetch(`http://localhost:3001/api/business/${business_slug}`);
+        
         if (!res.ok) {
+            console.error(`Failed to fetch business data: ${res.status}`);
             return { notFound: true };
         }
 
         const business = await res.json();
 
-        // Pass the business data to the page
         return {
-            props: { business }, // Pass business-specific data as props
+            props: { 
+                business,
+                slug: business_slug // Pass the slug to the component
+            },
         };
     } catch (error) {
         console.error("Error fetching business data:", error);
@@ -24,7 +28,11 @@ export async function getServerSideProps(context) {
     }
 }
 
-export default function BusinessPage({ business }) {
+export default function BusinessPage({ business, slug }) {
+    if (!business) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-8">
             <div className="max-w-3xl w-full bg-white shadow-md rounded-lg p-6">
@@ -35,7 +43,7 @@ export default function BusinessPage({ business }) {
                     This is <span className="font-semibold">{business.name}</span>'s dynamic booking page. Follow the steps below to complete your booking.
                 </p>
                 <div className="border-t border-gray-200 mt-4 pt-4">
-                    <MultiStepForm />
+                    <MultiStepForm business={business} />
                 </div>
             </div>
         </div>

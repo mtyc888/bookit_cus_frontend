@@ -1,17 +1,16 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { useRouter } from "next/router";
 
-export default function ResourceStep({ nextStep, prevStep, handleDataChange, formData }){
+export default function ResourceStep({ nextStep, prevStep, handleDataChange, formData, business }){
     const [resourceData, setResourceData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const router = useRouter();
-    const { business_id } = router.query;
+
     useEffect(() => {
+        
         const fetchResources = async () => {
             try {
                 // Fetch services for the specific business owner by user_id
-                const response = await fetch(`http://localhost:3001/resources/${business_id}`);
+                const response = await fetch(`http://localhost:3001/api/resources/${business.slug}`);
                 if (!response.ok) {
                     throw new Error("Failed to fetch resources");
                 }
@@ -25,31 +24,32 @@ export default function ResourceStep({ nextStep, prevStep, handleDataChange, for
             }
         };
 
-        if (business_id) {
-            fetchResources();
-        }
-    }, [business_id]);
+        fetchResources();
+    }, [business]);
 
     if (loading) {
-        return <p>Loading resources...</p>;
+        return <p className='text-black'>Loading resources...</p>;
     }
     const handleSelectedResource = (resource) =>{
-        handleDataChange("resource_id", resource.resource_id);
+        handleDataChange("resource",{
+            id: resource.resource_id,
+            name: resource.name
+        });
         nextStep();
     }
     return(
-        <div className='flex flex-col'>
-            <h1 className=''>Select a Resource</h1>
+        <div className='flex flex-col justify-between items-center'>
+            <h1 className='text-black'>Select a Resource</h1>
             {resourceData.length > 0 ? (
                 resourceData.map((resource) => (
-                    <button key={resource.resource_id} onClick={() => handleSelectedResource(resource)}>
+                    <button key={resource.resource_id} onClick={() => handleSelectedResource(resource)} className='text-black border rounded-xl w-1/2'>
                         {resource.name}
                     </button>
                 ))
             ) : (
                 <p>No resources available</p>
             )}
-            <button onClick={prevStep}>Go Back</button>
+            <button onClick={prevStep} className='text-black'>Go Back</button>
         </div>
     )
 }
