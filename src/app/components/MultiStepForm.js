@@ -6,7 +6,8 @@ import Resources from './ResourceStep';
 import Booking from './BookingStep';
 import Summary from './Summary';
 
-export default function MultiStepForm({ business }) { // Add business prop here
+export default function MultiStepForm({ business }) {
+    
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({

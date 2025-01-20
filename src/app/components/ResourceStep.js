@@ -34,16 +34,22 @@ export default function ResourceStep({ nextStep, prevStep, handleDataChange, for
         handleDataChange("resource",{
             id: resource.resource_id,
             name: resource.name
-        });
+        }); 
         nextStep();
     }
     return(
-        <div className='flex flex-col justify-between items-center'>
-            <h1 className='text-black'>Select a Resource</h1>
+        <div className='flex flex-col justify-between items-center gap-4'>
+            <h1 className='text-xl font-semibold text-gray-800'>Select a Resource</h1>
             {resourceData.length > 0 ? (
                 resourceData.map((resource) => (
-                    <button key={resource.resource_id} onClick={() => handleSelectedResource(resource)} className='text-black border rounded-xl w-1/2'>
-                        {resource.name}
+                    <button 
+                    key={resource.resource_id} 
+                    onClick={() => handleSelectedResource(resource)} 
+                    className='w-full px-4 py-3 text-left border rounded-xl hover:bg-gray-50 transition-colors duration-200'
+                    >
+                        <div className='flex flex-col'>
+                            <span className='text-gray-800 font-medium'>{resource.name}</span>
+                        </div>
                     </button>
                 ))
             ) : (
