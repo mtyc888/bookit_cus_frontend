@@ -1,10 +1,11 @@
+"use client";
 import React, { useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import { useRouter } from 'next/navigation';
 const Summary = ({ formData, prevStep, setStep, setFormData, business }) => {
     console.log('Business in Summary:', business);
+    const router = useRouter();
     const [error, setError] = useState(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [customerInfo, setCustomerInfo] = useState({
       customer_name: '',
       customer_phone: '',
@@ -31,22 +32,12 @@ const Summary = ({ formData, prevStep, setStep, setFormData, business }) => {
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
     };
-    const notifySuccess = () => {
-      toast.success("Booking Successful, Please Check Your Email For Summary.");
-    };
-    const notifyError = () => {
-      toast.error("Booking UnSuccessful.");
-    };
     const handleFinish = async () => {
-      //prevent multiple submissions
-        if(isSubmitting){
-          return;
-        }
         if(!validationForm()){
-            notifyError();
             return;
         }
-        setIsSubmitting(true);
+        //show loading using state
+        setIsLoading(true);
         try {
             // First API call - booking
             const response = await fetch(`http://localhost:3001/api/bookings`, {
@@ -73,7 +64,7 @@ const Summary = ({ formData, prevStep, setStep, setFormData, business }) => {
             if (!response.ok) {
                 throw new Error('Booking creation failed');
             }
-
+            const bookingData = await response.json();
             // Second API call - email
             const emailResponse = await fetch(`http://localhost:3001/api/notifications/send-mail`, {
                 method: "POST",
@@ -81,16 +72,16 @@ const Summary = ({ formData, prevStep, setStep, setFormData, business }) => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    to: customerInfo.customer_email,
-                    template: "booking",
-                    data: {
-                        customerName: customerInfo.customer_name,
-                        date: formData.booking?.starts_at?.split('T')[0] || '',
-                        time: formData.booking?.time,
-                        service: formData.service?.name,
-                        location: formData.location?.name
-                    },
-                    from: "ymarvintan@gmail.com"  // Removed process.env as it's client-side
+                  to: customerInfo.customer_email,
+                  template: "booking",
+                  data: {
+                      customer_name: customerInfo.customer_name,  
+                      service_name: formData.service?.name,
+                      location_name: formData.location?.name,
+                      time: `${formData.booking?.starts_at?.split('T')[0]} ${formData.booking?.time}`,
+                      service_price: formData.service?.price
+                  },
+                  from: "ymarvintan@gmail.com"
                 })
             });
 
@@ -98,23 +89,46 @@ const Summary = ({ formData, prevStep, setStep, setFormData, business }) => {
                 const emailError = await emailResponse.json();
                 throw new Error(emailError.message || 'Failed to send email notification');
             }
-
-            // If both calls succeed, show success notification and reset
-            notifySuccess();
             
+            //save the booking confirmation details
+            const bookingConfirmation = {
+              bookingId: bookingData.id,
+              customerInfo: {
+                name: customerInfo.customer_name,
+                email: customerInfo.customer_email,
+                phone: customerInfo.customer_phone
+              },
+              serviceInfo: {
+                name: formData.service?.name,
+                price: formData.service?.price,
+                location: formData.location?.name,
+                resource: formData.booking?.resource?.name,
+                date: formData.booking?.starts_at?.split('T')[0] || '',
+                time: formData.booking?.time
+              },
+              business: {
+                name: business?.name,
+                id: business?.id,
+                slug: business?.slug
+              }
+            }
+
             // Clear storage and reset state
             localStorage.removeItem("currentStep");
             localStorage.removeItem("formData");
-            setStep(1);
+            //here we need to redirect to summary page
+            localStorage.setItem("bookingConfirmation", JSON.stringify(bookingConfirmation));
+            // Redirect to confirmation page
+            router.push(`/${business.slug}/booking_confirmation`);
             setFormData({ service: null, location: null, resource: null, booking: null });
 
         } catch (error) {
-            notifyError();
             setError(error.message);
             console.error('Error:', error.message);
             return; // Prevent state reset on error
         } finally{
-          setIsSubmitting(false); //re-enable
+          //hide loading using state
+          setIsLoading(false);
         }
     };
 
@@ -135,18 +149,16 @@ const Summary = ({ formData, prevStep, setStep, setFormData, business }) => {
 
     return (
         <div className="flex flex-col items-center gap-4 p-8 text-black">
-            <ToastContainer 
-                position="top-right"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-            />
+            {/* Add loading overlay */}
+            {isLoading && (
+                <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-50">
+                    <div className="text-center">
+                        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <h2 className="text-xl font-semibold text-blue-500">Processing your booking...</h2>
+                        <p className="text-gray-500 mt-2">Please wait a moment</p>
+                    </div>
+                </div>
+            )}
             <h2 className="text-2xl font-semibold mb-4">Booking Summary</h2>
             {/* Customer Information Form */}
             <div className="w-full max-w-md space-y-4 bg-white p-6 rounded-lg shadow mb-4">
@@ -201,25 +213,15 @@ const Summary = ({ formData, prevStep, setStep, setFormData, business }) => {
             <div className="flex gap-4 mt-6">
               <button 
                   onClick={prevStep}
-                  disabled={isSubmitting}
-                  className={`${
-                      isSubmitting 
-                      ? 'bg-gray-300 cursor-not-allowed' 
-                      : 'bg-gray-200 hover:bg-gray-300'
-                  } text-gray-800 py-2 px-6 rounded-lg transition-colors`}
+                  className={`text-gray-800 py-2 px-6 rounded-lg transition-colors`}
               >
                   Go Back
               </button>
               <button 
                   onClick={handleFinish}
-                  disabled={isSubmitting}
-                  className={`${
-                      isSubmitting 
-                      ? 'bg-blue-300 cursor-not-allowed' 
-                      : 'bg-blue-500 hover:bg-blue-600'
-                  } text-white py-2 px-6 rounded-lg transition-colors`}
+                  className={`text-black py-2 px-6 rounded-lg transition-colors`}
               >
-                  {isSubmitting ? 'Confirming...' : 'Confirm Booking'}
+                  Confirm Booking
               </button>
             </div>
         </div>

@@ -1,10 +1,10 @@
-// pages/[business_slug]/index.js
 import MultiStepForm from "@/app/components/MultiStepForm";
 import "@/app/globals.css";
 
 export async function getServerSideProps(context) {
-    const { business_slug } = context.params; // Changed from business_id to business_slug
-
+    
+    const { business_slug } = context.params; 
+    console.log("business_slug:", business_slug);
     try {
         // Updated API endpoint to use slug
         const res = await fetch(`http://localhost:3001/api/business/${business_slug}`);
@@ -19,7 +19,7 @@ export async function getServerSideProps(context) {
         return {
             props: { 
                 business,
-                slug: business_slug // Pass the slug to the component
+                slug: business_slug 
             },
         };
     } catch (error) {
