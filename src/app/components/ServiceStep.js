@@ -17,7 +17,7 @@ export default function Services({ nextStep, handleDataChange, business }) {
                 }
 
                 // Updated to use slug instead of ID
-                const response = await fetch(`http://localhost:3001/api/services/${business.slug}`);
+                const response = await fetch(`http://13.229.116.85:3001/api/services/${business.slug}`);
                 if (!response.ok) {
                     throw new Error("Failed to fetch services");
                 }

@@ -10,7 +10,7 @@ export default function ResourceStep({ nextStep, prevStep, handleDataChange, for
         const fetchResources = async () => {
             try {
                 // Fetch services for the specific business owner by user_id
-                const response = await fetch(`http://localhost:3001/api/resources/${business.slug}`);
+                const response = await fetch(`http://13.229.116.85:3001/api/resources/${business.slug}`);
                 if (!response.ok) {
                     throw new Error("Failed to fetch resources");
                 }

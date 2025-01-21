@@ -13,7 +13,7 @@ export default function Locations({ nextStep, prevStep, handleDataChange, busine
                     return;
                 }
 
-                const response = await fetch(`http://localhost:3001/api/locations/${business.slug}`);
+                const response = await fetch(`http://13.229.116.85:3001/api/locations/${business.slug}`);
                 if (!response.ok) {
                     throw new Error("Failed to fetch locations");
                 }

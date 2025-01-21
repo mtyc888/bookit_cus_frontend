@@ -40,7 +40,7 @@ const Summary = ({ formData, prevStep, setStep, setFormData, business }) => {
         setIsLoading(true);
         try {
             // First API call - booking
-            const response = await fetch(`http://localhost:3001/api/bookings`, {
+            const response = await fetch(`http://13.229.116.85:3001/api/bookings`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -66,7 +66,7 @@ const Summary = ({ formData, prevStep, setStep, setFormData, business }) => {
             }
             const bookingData = await response.json();
             // Second API call - email
-            const emailResponse = await fetch(`http://localhost:3001/api/notifications/send-mail`, {
+            const emailResponse = await fetch(`http://13.229.116.85:3001/api/notifications/send-mail`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
