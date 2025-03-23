@@ -7,7 +7,7 @@ export async function getServerSideProps(context) {
     console.log("business_slug:", business_slug);
     try {
         // Updated API endpoint to use slug
-        const res = await fetch(`http://13.229.116.85:3001/api/business/${business_slug}`);
+        const res = await fetch(`http://ec2-3-1-205-2.ap-southeast-1.compute.amazonaws.com:3001/api/business/${business_slug}`);
         
         if (!res.ok) {
             console.error(`Failed to fetch business data: ${res.status}`);

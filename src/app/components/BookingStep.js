@@ -23,7 +23,7 @@ export default function BookingStep({ nextStep, prevStep, handleDataChange, form
                 const from = new Date().toISOString();
                 const to = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
                 const response = await axios.get(
-                    `http://13.229.116.85:3001/api/services/${formData.service.id}/bookable-slots`,
+                    `http://ec2-3-1-205-2.ap-southeast-1.compute.amazonaws.com:3001/api/services/${formData.service.id}/bookable-slots`,
                     {
                         params: {
                             from,
